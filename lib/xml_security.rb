@@ -21,6 +21,8 @@
 #
 # Copyright 2007 Sun Microsystems Inc. All Rights Reserved
 # Portions Copyrighted 2007 Todd W Saxton.
+#
+require 'ruby-debug'
 
 require 'rubygems'
 require 'ffi'
@@ -29,11 +31,15 @@ require "xml/libxml"
 require "openssl"
 require "digest/sha1"
 
-require 'xml_security/ffi'
-require 'xml_security/signed_document'
-
-require 'ruby-debug'
+require 'xml_security/c/lib_xml'
+require 'xml_security/c/xml_sec'
 
 module XMLSecurity
-  include XMLSecurity::FFI
+  def self.init
+    C::LibXML.init
+    C::XMLSec.init
+  end
+
+  def self.sign(xml_document, private_key)
+  end
 end

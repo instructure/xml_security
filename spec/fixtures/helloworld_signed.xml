@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<greeting>
+  <contents>Hello XML World!</contents>
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
+<SignedInfo>
+<CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+<SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
+<Reference>
+<Transforms>
+<Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+</Transforms>
+<DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
+<DigestValue>TvithD2xblxATXHhuSOuIECij0M=</DigestValue>
+</Reference>
+</SignedInfo>
+<SignatureValue>r+ORd3vpW4lQNylRO+zM8w3vW/H5B8X/cwevHLbemJson6S74ibIL84OI7yqAjU0
+Ghov3yka/W79oFJL5wQKXLKPrqUu+L1VVm6l5ngvM/+fsm/TVGIpGnPPfUxlk/ZQ
+HYhnTN4tj6csIWX/IPHbcL7m3VsHHoKOj3EzNvVwhck=</SignatureValue>
+<KeyInfo>
+<KeyName>../ssl/testkey.pem</KeyName>
+</KeyInfo>
+</Signature></greeting>
