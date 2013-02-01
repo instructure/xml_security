@@ -13,7 +13,7 @@ describe XMLSecurity do
       expected_output_xml = File.read(fixture_path("helloworld_signed.xml"))
 
       output_xml = XMLSecurity.sign(input_xml, TEST_KEY_PATH)
-      
+
       output_xml.should == expected_output_xml
     end
   end

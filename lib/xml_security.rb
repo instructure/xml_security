@@ -62,10 +62,32 @@ module XMLSecurity
     raise "failed to create signature template" if sign_node.null?
     C::LibXML.xmlAddChild(C::LibXML.xmlDocGetRootElement(doc), sign_node)
 
-    # ref_node = C::XMLSec.xmlSecTmplSignatureAddReference(sign_node, C::XMLSec.xmlSecTransformSha1Id, nil, nil, nil)
-    # raise "failed to add a reference" if ref_node.null?
-    #
-    # TO BE CONTINUED... translating from sign2.c
+    ref_node = C::XMLSec.xmlSecTmplSignatureAddReference(sign_node, C::XMLSec.xmlSecOpenSSLTransformSha1GetKlass, nil, nil, nil)
+    raise "failed to add a reference" if ref_node.null?
+
+    envelope_result = C::XMLSec.xmlSecTmplReferenceAddTransform(ref_node, C::XMLSec.xmlSecTransformEnvelopedGetKlass)
+    raise "failed to add envelope transform to reference" if envelope_result.null?
+
+    key_info_node = C::XMLSec.xmlSecTmplSignatureEnsureKeyInfo(sign_node, nil)
+    raise "failed to add key info" if key_info_node.null?
+
+    digital_signature_context = C::XMLSec.xmlSecDSigCtxCreate(nil)
+    raise "failed to create signature context" if digital_signature_context.null?
+
+    digital_signature_context[:signKey] = C::XMLSec.xmlSecOpenSSLAppKeyLoad(private_key, :xmlSecKeyDataFormatPem, nil, nil, nil)
+    raise "failed to load private pem ley from #{private_key}" if digital_signature_context[:signKey].null?
+
+    if C::XMLSec.xmlSecKeySetName(digital_signature_context[:signKey], File.basename(private_key)) < 0
+      raise "failed to set key name for key of #{private_key}"
+    end
+
+    if C::XMLSec.xmlSecTmplKeyInfoAddKeyName(key_info_node, nil).null?
+      raise "failed to add key info"
+    end
+
+    if C::XMLSec.xmlSecDSigCtxSign(digital_signature_context, sign_node) < 0
+      raise "signature failed!"
+    end 
 
     _dump_doc(doc)
   end
@@ -76,6 +98,8 @@ module XMLSecurity
     C::LibXML.xmlDocDumpFormatMemory(doc, ptr, sizeptr, 1)
     strptr = ptr.read_pointer
     result = strptr.null? ? nil : strptr.read_string
-    puts result
+    result
+  ensure
+      
   end
 end

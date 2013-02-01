@@ -17,6 +17,6 @@
 Ghov3yka/W79oFJL5wQKXLKPrqUu+L1VVm6l5ngvM/+fsm/TVGIpGnPPfUxlk/ZQ
 HYhnTN4tj6csIWX/IPHbcL7m3VsHHoKOj3EzNvVwhck=</SignatureValue>
 <KeyInfo>
-<KeyName>../ssl/testkey.pem</KeyName>
+<KeyName>testkey.pem</KeyName>
 </KeyInfo>
 </Signature></greeting>

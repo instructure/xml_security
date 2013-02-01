@@ -114,6 +114,17 @@ module XMLSecurity
           :reserved1,                   :pointer
       end
 
+      # Would like to use this eventually, but something is wrong below; get segfaults when trying to use it.
+      class XmlSecKeyPtr < FFI::Struct
+        layout \
+           :name,           :string,  # xmlChar *
+           :value,          :pointer, # xmlSecKeyDataPtr
+           :dataList,       :pointer, # xmlSecPtrListPtr
+           :usage,          :pointer, # xmlSecKeyUsage
+           :notValidBefore, :pointer, # time_t
+           :notValidAfter,  :pointer  # time_t
+      end
+
       class XmlSecDSigCtx < FFI::Struct
         layout \
           :userData,                    :pointer,     # void *
@@ -167,8 +178,21 @@ module XMLSecurity
       attach_function :xmlSecEncCtxDestroy, [ :pointer ], :void
 
       attach_function :xmlSecTmplSignatureCreate, [ :pointer, :pointer, :pointer, :string ], :pointer
+      attach_function :xmlSecTmplSignatureAddReference, [ :pointer, :pointer, :pointer, :pointer, :pointer ], :pointer
+
       attach_function :xmlSecTransformExclC14NGetKlass, [], :pointer
       attach_function :xmlSecOpenSSLTransformRsaSha1GetKlass, [], :pointer
+      attach_function :xmlSecOpenSSLTransformSha1GetKlass, [], :pointer
+      attach_function :xmlSecTransformEnvelopedGetKlass, [], :pointer
+      attach_function :xmlSecTmplSignatureEnsureKeyInfo, [ :pointer, :pointer ], :pointer
+
+      attach_function :xmlSecTmplReferenceAddTransform, [ :pointer, :pointer ], :pointer
+
+      attach_function :xmlSecKeySetName, [ :pointer, :string ], :int
+
+      attach_function :xmlSecDSigCtxSign, [ :pointer, :pointer ], :int
+
+      attach_function :xmlSecTmplKeyInfoAddKeyName, [ :pointer, :pointer ], :pointer
 
       def self.init
         raise "Failed initializing XMLSec" if xmlSecInit < 0

@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <libgen.h>
 
 #include <libxml/tree.h>
 #include <libxml/xmlmemory.h>
@@ -218,7 +219,7 @@ sign_file(const char* xml_file, const char* key_file) {
     }
 
     /* set key name to the file name, this is just an example! */
-    if(xmlSecKeySetName(dsigCtx->signKey, key_file) < 0) {
+    if(xmlSecKeySetName(dsigCtx->signKey, basename((char *)key_file)) < 0) {
         fprintf(stderr,"Error: failed to set key name for key from \"%s\"\n", key_file);
         goto done;
     }
