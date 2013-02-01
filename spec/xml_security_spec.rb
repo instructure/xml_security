@@ -9,11 +9,12 @@ describe XMLSecurity do
 
   describe '.sign' do
     it 'properly signs the provided xml document with the referenced key' do
-      input_xml = File.read(fixture_path("helloworld.xml"))
+      input_xml = fixture_path("helloworld.xml")
       expected_output_xml = File.read(fixture_path("helloworld_signed.xml"))
-      key = TEST_KEY
 
-      XMLSecurity.sign(input_xml, key).should == expected_output_xml
+      output_xml = XMLSecurity.sign(input_xml, TEST_KEY_PATH)
+      
+      output_xml.should == expected_output_xml
     end
   end
 end

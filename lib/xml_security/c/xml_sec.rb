@@ -4,6 +4,7 @@ module XMLSecurity
   module C
     module XMLSec
       extend FFI::Library
+      ffi_lib_flags :now, :global
       ffi_lib 'xmlsec1-openssl'
 
       enum :xmlSecKeyDataFormat, [
@@ -165,10 +166,14 @@ module XMLSecurity
       attach_function :xmlSecEncCtxDecrypt, [ :pointer, :pointer ], :int
       attach_function :xmlSecEncCtxDestroy, [ :pointer ], :void
 
+      attach_function :xmlSecTmplSignatureCreate, [ :pointer, :pointer, :pointer, :string ], :pointer
+      attach_function :xmlSecTransformExclC14NGetKlass, [], :pointer
+      attach_function :xmlSecOpenSSLTransformRsaSha1GetKlass, [], :pointer
+
       def self.init
-        raise "Failed initializing XMLSec" if self.xmlSecInit < 0
-        raise "Failed initializing app crypto" if self.xmlSecOpenSSLAppInit(nil) < 0
-        raise "Failed initializing crypto" if self.xmlSecOpenSSLInit < 0
+        raise "Failed initializing XMLSec" if xmlSecInit < 0
+        raise "Failed initializing app crypto" if xmlSecOpenSSLAppInit(nil) < 0
+        raise "Failed initializing crypto" if xmlSecOpenSSLInit < 0
       end
     end
   end

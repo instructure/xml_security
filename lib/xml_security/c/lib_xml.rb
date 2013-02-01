@@ -11,6 +11,9 @@ module XMLSecurity
       attach_function :xmlDocGetRootElement, [ :pointer ], :pointer
       attach_function :xmlDocDumpFormatMemory, [ :pointer, :pointer, :pointer, :int ], :void
       attach_function :xmlFreeDoc, [ :pointer ], :void
+      attach_function :xmlParseFile, [ :string ], :pointer
+      attach_function :xmlParseMemory, [ :pointer, :int ], :pointer
+      attach_function :xmlAddChild, [ :pointer, :pointer ], :pointer
 
       def self.init
         xmlInitParser

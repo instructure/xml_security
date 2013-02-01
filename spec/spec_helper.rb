@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'spec'
+require 'spec/autorun'
 
 $:.unshift File.expand_path('../../lib', __FILE__)
 
@@ -11,4 +12,4 @@ def fixture_path(filename)
   "#{FIXTURE_PATH}/#{filename}"
 end
 
-TEST_KEY = File.read(File.expand_path('../ssl/testkey.pem', __FILE__))
+TEST_KEY_PATH = File.expand_path('../ssl/testkey.pem', __FILE__)
