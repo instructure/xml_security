@@ -6,3 +6,20 @@ Spec::Rake::SpecTask.new('spec') do |t|
 end
 
 task :default => :spec
+
+namespace :gem do
+  desc "clean built gem"
+  task :clean do
+    rm_f Dir.glob("*.gem")
+  end
+
+  desc "build the gem"
+  task :build => :clean do
+    sh "gem build supply_drop.gemspec"
+  end
+
+  desc "push the gem"
+  task :push => :build do
+    sh "gem push #{Dir.glob("*.gem").first}"
+  end
+end
