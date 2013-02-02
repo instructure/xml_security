@@ -15,7 +15,7 @@ namespace :gem do
 
   desc "build the gem"
   task :build => :clean do
-    sh "gem build supply_drop.gemspec"
+    sh "gem build xml_security.gemspec"
   end
 
   desc "push the gem"
