@@ -19,6 +19,9 @@ module XMLSecurity
           :xmlSecKeyDataFormatCertDer
       ]
 
+      enum :xmlSecKeyDataType, [
+      ]
+
       enum :xmlSecKeyInfoMode, [
           :xmlSecKeyInfoModeRead,
           :xmlSecKeyInfoModeWrite
@@ -170,6 +173,8 @@ module XMLSecurity
       attach_function :xmlSecOpenSSLAppDefaultKeysMngrInit, [ :pointer ], :int
       attach_function :xmlSecOpenSSLAppKeyLoad, [ :string, :xmlSecKeyDataFormat, :pointer, :pointer, :pointer ], :pointer
       attach_function :xmlSecOpenSSLAppKeyLoadMemory, [ :pointer, :uint, :xmlSecKeyDataFormat, :pointer, :pointer, :pointer ], :pointer
+      attach_function :xmlSecOpenSSLAppKeysMngrCertLoadMemory, [ :pointer, :pointer, :uint, :xmlSecKeyDataFormat, :uint ], :int
+
       attach_function :xmlSecOpenSSLAppDefaultKeysMngrAdoptKey, [ :pointer, :pointer ], :int
       attach_function :xmlSecKeysMngrDestroy, [ :pointer ], :void
 
@@ -193,6 +198,18 @@ module XMLSecurity
       attach_function :xmlSecDSigCtxSign, [ :pointer, :pointer ], :int
 
       attach_function :xmlSecTmplKeyInfoAddKeyName, [ :pointer, :pointer ], :pointer
+
+      def self.xmlSecNodeSignature
+        'Signature'
+      end
+
+      def self.xmlSecDSigNs
+        'http://www.w3.org/2000/09/xmldsig#'
+      end
+
+      def self.xmlSecKeyDataTypeTrusted
+        0x0100
+      end
 
       def self.init
         raise "Failed initializing XMLSec" if xmlSecInit < 0

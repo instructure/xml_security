@@ -24,18 +24,22 @@
 #
 require 'rubygems'
 require 'ffi'
+
+require 'libxml'
 require 'base64'
-require "xml/libxml"
-require "openssl"
-require "digest/sha1"
+require 'openssl'
 
 require 'xml_security/c/lib_xml'
 require 'xml_security/c/xml_sec'
-# require 'xml_security/c/xml_sec_app'
 
 require 'ruby-debug'
 
 module XMLSecurity
+  NAMESPACES = {
+    "xenc" => "http://www.w3.org/2001/04/xmlenc#",
+    "ds" => "http://www.w3.org/2000/09/xmldsig#"
+  }
+
   def self.init
     unless initialized?
       C::LibXML.init
@@ -51,7 +55,7 @@ module XMLSecurity
   def self.sign(xml_document, private_key)
     init
 
-    doc = C::LibXML.xmlParseFile(xml_document)
+    doc = C::LibXML.xmlParseMemory(xml_document, xml_document.size)
     raise "could not parse XML document" if doc.null?
 
     canonicalization_method_id = C::XMLSec.xmlSecTransformExclC14NGetKlass
@@ -90,6 +94,77 @@ module XMLSecurity
     end 
 
     _dump_doc(doc)
+  end
+
+  def self.verify_signature(signed_xml_document, cert_fingerprint=nil)
+    init
+    cert = _extract_embedded_certificate(signed_xml_document)
+
+    if cert_fingerprint
+      return false unless _fingerprint_matches?(cert_fingerprint, cert)
+    end
+
+    doc = C::LibXML.xmlParseMemory(signed_xml_document, signed_xml_document.size)
+    raise "could not parse XML document" if doc.null?
+
+    node = C::XMLSec.xmlSecFindNode(C::LibXML.xmlDocGetRootElement(doc), C::XMLSec.xmlSecNodeSignature, C::XMLSec.xmlSecDSigNs)
+    raise "start node not found" if node.null?
+
+    keys_manager = C::XMLSec.xmlSecKeysMngrCreate
+    raise "failed to create keys manager" if keys_manager.null?
+
+    if C::XMLSec.xmlSecOpenSSLAppDefaultKeysMngrInit(keys_manager) < 0
+      raise "failed to init and load default openssl keys into keys manager"
+    end
+
+    formatted_cert = cert.to_pem
+
+    cert_load_result = C::XMLSec.xmlSecOpenSSLAppKeysMngrCertLoadMemory(keys_manager, formatted_cert, formatted_cert.size, :xmlSecKeyDataFormatPem, C::XMLSec.xmlSecKeyDataTypeTrusted)
+    if cert_load_result < 0
+      raise "failed loading certificate"
+    end
+
+    digital_signature_context = C::XMLSec.xmlSecDSigCtxCreate(keys_manager)
+    raise "failed to create signature context" if digital_signature_context.null?
+
+    if C::XMLSec.xmlSecDSigCtxVerify(digital_signature_context, node) < 0
+      raise "error during signature verification"
+    end
+
+    digital_signature_context[:status] == :xmlSecDSigStatusSucceeded
+  end
+
+  def self._format_cert(cert)
+    # re-encode the certificate in the proper format
+    # this snippet is from http://bugs.ruby-lang.org/issues/4421
+    rsa = cert.public_key
+    modulus = rsa.n
+    exponent = rsa.e
+    oid = OpenSSL::ASN1::ObjectId.new("rsaEncryption")
+    alg_id = OpenSSL::ASN1::Sequence.new([oid, OpenSSL::ASN1::Null.new(nil)])
+    ary = [OpenSSL::ASN1::Integer.new(modulus), OpenSSL::ASN1::Integer.new(exponent)]
+    pub_key = OpenSSL::ASN1::Sequence.new(ary)
+    enc_pk = OpenSSL::ASN1::BitString.new(pub_key.to_der)
+    subject_pk_info = OpenSSL::ASN1::Sequence.new([alg_id, enc_pk])
+    base64 = Base64.encode64(subject_pk_info.to_der)
+
+    # This is the equivalent to the X.509 encoding used in >= 1.9.3
+    "-----BEGIN PUBLIC KEY-----\n#{base64}-----END PUBLIC KEY-----"
+  end
+
+
+  def self._fingerprint_matches?(expected_fingerprint, cert)
+    cert_fingerprint = Digest::SHA1.hexdigest(cert.to_der)
+    expected_fingerprint = idp_cert_fingerprint.gsub(":", "").downcase
+    return fingerprint == expected_fingerprint
+  end
+
+  def self._extract_embedded_certificate(xml_document)
+    parsed_document = LibXML::XML::Parser.string(xml_document).parse
+    base64_cert = parsed_document.find_first("//ds:X509Certificate", NAMESPACES).content
+    cert_text = Base64.decode64(base64_cert)
+    cert = OpenSSL::X509::Certificate.new(cert_text)
+    cert
   end
 
   def self._dump_doc(doc)
