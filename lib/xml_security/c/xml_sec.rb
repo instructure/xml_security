@@ -19,9 +19,6 @@ module XMLSecurity
           :xmlSecKeyDataFormatCertDer
       ]
 
-      enum :xmlSecKeyDataType, [
-      ]
-
       enum :xmlSecKeyInfoMode, [
           :xmlSecKeyInfoModeRead,
           :xmlSecKeyInfoModeWrite
