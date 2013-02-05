@@ -14,9 +14,15 @@ module XMLSecurity
       attach_function :xmlParseFile, [ :string ], :pointer
       attach_function :xmlParseMemory, [ :pointer, :int ], :pointer
       attach_function :xmlAddChild, [ :pointer, :pointer ], :pointer
+      attach_function :xmlCleanupParser, [], :void
+
 
       def self.init
         xmlInitParser
+      end
+
+      def self.shutdown
+        xmlCleanupParser
       end
     end
   end

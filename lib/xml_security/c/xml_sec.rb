@@ -162,6 +162,8 @@ module XMLSecurity
       attach_function :xmlSecDSigCtxCreate, [ :pointer ], XmlSecDSigCtx.by_ref
       attach_function :xmlSecDSigCtxVerify, [ XmlSecDSigCtx.by_ref, :pointer ], :int
       attach_function :xmlSecOpenSSLInit, [], :int
+      attach_function :xmlSecOpenSSLShutdown, [], :int
+      attach_function :xmlSecOpenSSLAppShutdown, [], :int
       attach_function :xmlSecOpenSSLAppInit, [ :pointer ], :int
       attach_function :xmlSecAddIDs, [ :pointer, :pointer, :pointer ], :void
       attach_function :xmlSecDSigCtxDestroy, [ XmlSecDSigCtx.by_ref ], :void
@@ -220,6 +222,11 @@ module XMLSecurity
         raise "Failed initializing XMLSec" if xmlSecInit < 0
         raise "Failed initializing app crypto" if xmlSecOpenSSLAppInit(nil) < 0
         raise "Failed initializing crypto" if xmlSecOpenSSLInit < 0
+      end
+
+      def self.shutdown
+        xmlSecOpenSSLShutdown
+        xmlSecOpenSSLAppShutdown
       end
     end
   end

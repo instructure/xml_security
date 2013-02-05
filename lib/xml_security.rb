@@ -48,6 +48,14 @@ module XMLSecurity
     end
   end
 
+  def self.shutdown
+    if initialized?
+      C::XMLSec.shutdown
+      C::LibXML.shutdown
+      @initialized = false
+    end
+  end
+
   def self.initialized?
     !!@initialized
   end
@@ -94,6 +102,9 @@ module XMLSecurity
     end
 
     _dump_doc(doc)
+  ensure
+    C::LibXML.xmlFreeDoc(doc) if defined?(doc) && !doc.null?
+    C::XMLSec.xmlSecDSigCtxDestroy(digital_signature_context) if defined?(digital_signature_context) && !digital_signature_context.null?
   end
 
   def self.verify_signature(signed_xml_document, cert_fingerprint=nil)
@@ -210,6 +221,5 @@ module XMLSecurity
     result = strptr.null? ? nil : strptr.read_string
     result
   ensure
-
   end
 end

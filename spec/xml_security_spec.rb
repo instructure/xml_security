@@ -16,6 +16,25 @@ describe XMLSecurity do
 
       output_xml.should == expected_output_xml
     end
+
+    it 'does not leak memory' do
+      input_xml = fixture_path("helloworld.xml")
+      expected_output_xml = File.read(fixture_path("helloworld_signed.xml"))
+
+      memory_usage_before = `ps -o rss= -p #{Process.pid}`.to_i
+
+      1000.times do
+        XMLSecurity.sign(File.read(input_xml), TEST_KEY_PATH)
+      end
+
+      GC.start
+
+      memory_usage_after = `ps -o rss= -p #{Process.pid}`.to_i
+
+      kilobytes_used = memory_usage_after - memory_usage_before
+      puts kilobytes_used
+      kilobytes_used.should be < 1024
+    end
   end
 
   describe '.verify_signature' do
