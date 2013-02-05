@@ -1,7 +1,6 @@
 source :rubygems
 
 gem 'ffi'
-gem 'libxml-ruby'
 
 group :development do
   gem 'ruby-debug', :platform => :ruby_18

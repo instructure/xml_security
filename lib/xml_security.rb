@@ -109,8 +109,6 @@ module XMLSecurity
 
   def self.verify_signature(signed_xml_document, cert_fingerprint=nil)
     init
-    cert = _extract_embedded_certificate(signed_xml_document)
-
     if cert_fingerprint
       return false unless _fingerprint_matches?(cert_fingerprint, cert)
     end
@@ -118,26 +116,53 @@ module XMLSecurity
     doc = C::LibXML.xmlParseMemory(signed_xml_document, signed_xml_document.size)
     raise "could not parse XML document" if doc.null?
 
-    node = C::XMLSec.xmlSecFindNode(C::LibXML.xmlDocGetRootElement(doc), C::XMLSec.xmlSecNodeSignature, C::XMLSec.xmlSecDSigNs)
-    raise "start node not found" if node.null?
+    doc_root = C::LibXML.xmlDocGetRootElement(doc)
+    raise "could not get doc root" if doc_root.null?
 
     keys_manager = _init_keys_manager
-
-    formatted_cert = cert.to_pem
-
-    cert_load_result = C::XMLSec.xmlSecOpenSSLAppKeysMngrCertLoadMemory(keys_manager, formatted_cert, formatted_cert.size, :xmlSecKeyDataFormatPem, C::XMLSec.xmlSecKeyDataTypeTrusted)
-    if cert_load_result < 0
-      raise "failed loading certificate"
-    end
 
     digital_signature_context = C::XMLSec.xmlSecDSigCtxCreate(keys_manager)
     raise "failed to create signature context" if digital_signature_context.null?
 
-    if C::XMLSec.xmlSecDSigCtxVerify(digital_signature_context, node) < 0
+    key_info_context = C::XMLSec.xmlSecKeyInfoCtxCreate(keys_manager)
+    raise "could not create key info context" if key_info_context.null?
+
+    signature_node = C::XMLSec.xmlSecFindNode(doc_root, C::XMLSec.xmlSecNodeSignature, C::XMLSec.xmlSecDSigNs)
+    raise "signature node not found" if signature_node.null?
+
+    key_info_node = C::XMLSec.xmlSecFindNode(signature_node, C::XMLSec.xmlSecNodeKeyInfo, C::XMLSec.xmlSecDSigNs)
+    raise "key_info node not found" if key_info_node.null?
+
+    certificate_node = C::XMLSec.xmlSecFindNode(signature_node, C::XMLSec.xmlSecNodeX509Certificate, C::XMLSec.xmlSecDSigNs)
+    raise "certificate node not found" if certificate_node.null?
+
+    key = C::XMLSec.xmlSecKeyCreate
+    raise "error while allocating security key" if key.null?
+
+    certptr = C::LibXML.xmlNodeGetContent(certificate_node)
+    raise "error while reading certificate node" if certptr.null?
+    cert64 = certptr.read_string
+    # C::LibXML.xmlFree(certptr)
+
+    certptr = FFI::MemoryPointer.new(:uchar, cert64.size)
+
+    bytesout = C::XMLSec.xmlSecBase64Decode(cert64, certptr, certptr.size)
+    cert = certptr.read_bytes(bytesout)
+
+    key_add_result = C::XMLSec.xmlSecOpenSSLAppKeysMngrCertLoadMemory(keys_manager, cert, cert.size, :xmlSecKeyDataFormatDer, C::XMLSec.xmlSecKeyDataTypeTrusted)
+    raise "failed to add key to keys manager" if key_add_result < 0
+
+    if C::XMLSec.xmlSecDSigCtxVerify(digital_signature_context, signature_node) < 0
       raise "error during signature verification"
     end
 
     digital_signature_context[:status] == :xmlSecDSigStatusSucceeded
+  ensure
+    C::LibXML.xmlFreeDoc(doc) if defined?(doc) && doc && !doc.null?
+    C::XMLSec.xmlSecDSigCtxDestroy(digital_signature_context) if defined?(digital_signature_context) && digital_signature_context && !digital_signature_context.null?
+    C::XMLSec.xmlSecKeysMngrDestroy(keys_manager) if defined?(keys_manager) && keys_manager && !keys_manager.null?
+    C::XMLSec.xmlSecKeyInfoCtxDestroy(key_info_context) if defined?(key_info_context) && key_info_context && !key_info_context.null?
+    C::XMLSec.xmlSecKeyDestroy(key) if defined?(key) && key && !key.null?
   end
 
   def self.decrypt(encrypted_xml, private_key)

@@ -159,6 +159,7 @@ module XMLSecurity
       attach_function :xmlSecInit, [], :int
       attach_function :xmlSecParseMemory, [ :pointer, :uint, :int ], :pointer
       attach_function :xmlSecFindNode, [ :pointer, :string, :string ], :pointer
+      attach_function :xmlSecFindChild, [ :pointer, :string, :string ], :pointer
       attach_function :xmlSecDSigCtxCreate, [ :pointer ], XmlSecDSigCtx.by_ref
       attach_function :xmlSecDSigCtxVerify, [ XmlSecDSigCtx.by_ref, :pointer ], :int
       attach_function :xmlSecOpenSSLInit, [], :int
@@ -197,9 +198,27 @@ module XMLSecurity
       attach_function :xmlSecDSigCtxSign, [ :pointer, :pointer ], :int
 
       attach_function :xmlSecTmplKeyInfoAddKeyName, [ :pointer, :pointer ], :pointer
+      attach_function :xmlSecKeyInfoCtxCreate, [ :pointer ], XmlSecKeyInfoCtx.by_ref
+      attach_function :xmlSecKeyInfoCtxDestroy, [ XmlSecKeyInfoCtx.by_ref ], :void
+      attach_function :xmlSecKeyInfoNodeRead, [ :pointer, :pointer, :pointer ], :int
+
+      attach_function :xmlSecKeyCreate, [], :pointer
+      attach_function :xmlSecKeyDestroy, [ :pointer ], :void
+
+      attach_function :xmlSecBase64Decode, [ :pointer, :pointer, :uint ], :int
+
+      XMLSEC_KEYINFO_FLAGS_X509DATA_DONT_VERIFY_CERTS = 0x00000200
 
       def self.xmlSecNodeSignature
         'Signature'
+      end
+
+      def self.xmlSecNodeKeyInfo
+        'KeyInfo'
+      end
+
+      def self.xmlSecNodeX509Certificate
+        'X509Certificate'
       end
 
       def self.xmlSecDSigNs
@@ -216,6 +235,10 @@ module XMLSecurity
 
       def self.xmlSecNodeEncryptedData
         'EncryptedData'
+      end
+
+      def self.xmlSecNodeX509Certificate
+        'X509Certificate'
       end
 
       def self.init
