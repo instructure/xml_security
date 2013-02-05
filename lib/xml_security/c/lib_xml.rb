@@ -18,7 +18,7 @@ module XMLSecurity
       attach_function :xmlNodeGetContent, [ :pointer ], :pointer # xmlChar *
 
       attach_function :xmlFree, [ :pointer ], :void
-      attach_function :xmlMalloc, [ :uint ], :pointer
+      attach_function :xmlMalloc, [ :int ], :pointer
 
       def self.init
         xmlInitParser
