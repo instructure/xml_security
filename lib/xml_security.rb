@@ -25,10 +25,6 @@
 require 'rubygems'
 require 'ffi'
 
-require 'libxml'
-require 'base64'
-require 'openssl'
-
 require 'xml_security/c/lib_xml'
 require 'xml_security/c/xml_sec'
 
