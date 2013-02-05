@@ -25,4 +25,14 @@ describe XMLSecurity do
       XMLSecurity.verify_signature(signed_xml).should be_true
     end
   end
+
+  describe '.decrypt' do
+    it 'decrypts encrypted elements using the specified key' do
+      encrypted_xml = File.read(fixture_path("encrypted_assertion.xml"))
+
+      decrypted_xml = XMLSecurity.decrypt(encrypted_xml, ENCRYPTION_TEST_KEY_PATH)
+
+      decrypted_xml.should include('InResponseTo="e034c5ecd6336dd02d1bf61214e6c76feb84ebe785"')
+    end
+  end
 end

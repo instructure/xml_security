@@ -204,8 +204,16 @@ module XMLSecurity
         'http://www.w3.org/2000/09/xmldsig#'
       end
 
+      def self.xmlSecEncNs
+        'http://www.w3.org/2001/04/xmlenc#'
+      end
+
       def self.xmlSecKeyDataTypeTrusted
         0x0100
+      end
+
+      def self.xmlSecNodeEncryptedData
+        'EncryptedData'
       end
 
       def self.init

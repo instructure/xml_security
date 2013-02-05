@@ -1,5 +1,5 @@
-PROGRAM = verify3
-PROGRAM_FILES = verify3.c
+PROGRAM = encrypt2
+PROGRAM_FILES = encrypt2.c
 
 
 CC=gcc

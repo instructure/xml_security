@@ -91,7 +91,7 @@ module XMLSecurity
 
     if C::XMLSec.xmlSecDSigCtxSign(digital_signature_context, sign_node) < 0
       raise "signature failed!"
-    end 
+    end
 
     _dump_doc(doc)
   end
@@ -110,12 +110,7 @@ module XMLSecurity
     node = C::XMLSec.xmlSecFindNode(C::LibXML.xmlDocGetRootElement(doc), C::XMLSec.xmlSecNodeSignature, C::XMLSec.xmlSecDSigNs)
     raise "start node not found" if node.null?
 
-    keys_manager = C::XMLSec.xmlSecKeysMngrCreate
-    raise "failed to create keys manager" if keys_manager.null?
-
-    if C::XMLSec.xmlSecOpenSSLAppDefaultKeysMngrInit(keys_manager) < 0
-      raise "failed to init and load default openssl keys into keys manager"
-    end
+    keys_manager = _init_keys_manager
 
     formatted_cert = cert.to_pem
 
@@ -132,6 +127,46 @@ module XMLSecurity
     end
 
     digital_signature_context[:status] == :xmlSecDSigStatusSucceeded
+  end
+
+  def self.decrypt(encrypted_xml, private_key)
+    init
+
+    keys_manager = _init_keys_manager
+
+    key = C::XMLSec.xmlSecOpenSSLAppKeyLoad(private_key, :xmlSecKeyDataFormatPem, nil, nil, nil)
+    raise "failed to load private pem ley from #{private_key}" if key.null?
+
+    key_add_result = C::XMLSec.xmlSecOpenSSLAppDefaultKeysMngrAdoptKey(keys_manager, key)
+    raise "failed to add key to keys manager" if key_add_result < 0
+
+    doc = C::LibXML.xmlParseMemory(encrypted_xml, encrypted_xml.size)
+    raise "could not parse XML document" if doc.null?
+
+    doc_root = C::LibXML.xmlDocGetRootElement(doc)
+    raise "could not get root element" if doc_root.null?
+
+    start_node = C::XMLSec.xmlSecFindNode(doc_root, C::XMLSec.xmlSecNodeEncryptedData, C::XMLSec.xmlSecEncNs)
+    raise "start node not found" if start_node.null?
+
+    encryption_context = C::XMLSec.xmlSecEncCtxCreate(keys_manager)
+    raise "failed to create encryption context" if encryption_context.null?
+
+    encryption_result = C::XMLSec.xmlSecEncCtxDecrypt(encryption_context, start_node)
+    raise "decryption failed" if (encryption_result < 0)
+
+    _dump_doc(doc)
+  end
+
+  def self._init_keys_manager
+    keys_manager = C::XMLSec.xmlSecKeysMngrCreate
+    raise "failed to create keys manager" if keys_manager.null?
+
+    if C::XMLSec.xmlSecOpenSSLAppDefaultKeysMngrInit(keys_manager) < 0
+      raise "failed to init and load default openssl keys into keys manager"
+    end
+
+    keys_manager
   end
 
   def self._format_cert(cert)
@@ -175,6 +210,6 @@ module XMLSecurity
     result = strptr.null? ? nil : strptr.read_string
     result
   ensure
-      
+
   end
 end
