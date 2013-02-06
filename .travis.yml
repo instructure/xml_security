@@ -3,4 +3,4 @@ rvm:
   - 1.9.3
   - ree
 before_install:
-  - sudo apt-get install libxmlsec1-openssl
+  - sudo apt-get install libxmlsec1-openssl libxmlsec1-dev
