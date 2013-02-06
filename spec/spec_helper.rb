@@ -16,18 +16,16 @@ def current_memory_usage
   `ps -o rss= -p #{Process.pid}`.to_i
 end
 
-def should_not_leak_more_than(kilobytes, &block)
+def should_not_leak_more_than(max_kilobytes)
   memory_usage_before = current_memory_usage
 
-  block.call
+  yield
 
   GC.start
-  memory_usage_after = current_memory_usage
 
-  kilobytes_used = memory_usage_after - memory_usage_before
-  puts "#{kilobytes_used} KB used (wanted less than #{kilobytes} KB)"
+  kilobytes_used = current_memory_usage - memory_usage_before
 
-  kilobytes_used.should be < 1024
+  kilobytes_used.should be < max_kilobytes
 end
 
 TEST_KEY_PATH = File.expand_path('../ssl/testkey.pem', __FILE__)

@@ -207,6 +207,8 @@ module XMLSecurity
 
       attach_function :xmlSecBase64Decode, [ :pointer, :pointer, :uint ], :int
 
+      attach_function :xmlSecShutdown, [], :void
+
       XMLSEC_KEYINFO_FLAGS_X509DATA_DONT_VERIFY_CERTS = 0x00000200
 
       def self.xmlSecNodeSignature
@@ -250,6 +252,7 @@ module XMLSecurity
       def self.shutdown
         xmlSecOpenSSLShutdown
         xmlSecOpenSSLAppShutdown
+        xmlSecShutdown
       end
     end
   end

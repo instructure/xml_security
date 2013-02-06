@@ -18,13 +18,10 @@ describe XMLSecurity do
     end
 
     it 'does not leak memory' do
-      pending('need to figure out how to bind xmlFree safely')
       input_xml = File.read(fixture_path("helloworld.xml"))
       expected_output_xml = File.read(fixture_path("helloworld_signed.xml"))
 
-      XMLSecurity.init
-
-      should_not_leak_more_than(1024) do
+      should_not_leak_more_than(4*1024) do
         1000.times do
           XMLSecurity.sign(input_xml, TEST_KEY_PATH)
         end

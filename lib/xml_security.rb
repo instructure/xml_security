@@ -240,9 +240,11 @@ module XMLSecurity
     C::LibXML.xmlDocDumpFormatMemory(doc, ptr, sizeptr, 1)
     strptr = ptr.read_pointer
     result = strptr.null? ? nil : strptr.read_string
-    ptr.free
-    sizeptr.free
+
     result
   ensure
+    ptr.free if defined?(ptr) && ptr
+    sizeptr.free if defined?(sizeptr) && sizeptr
+    C::LibXML.xmlFree(strptr) if defined?(strptr) && strptr && !strptr.null?
   end
 end
