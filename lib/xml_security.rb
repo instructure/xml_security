@@ -199,6 +199,12 @@ module XMLSecurity
     _dump_doc(doc)
   end
 
+  def self.mute(&block)
+    C::XMLSec.xmlSecErrorsDefaultCallbackEnableOutput(false)
+    block.call
+    C::XMLSec.xmlSecErrorsDefaultCallbackEnableOutput(true)
+  end
+
   def self._init_keys_manager
     keys_manager = C::XMLSec.xmlSecKeysMngrCreate
     raise "failed to create keys manager" if keys_manager.null?

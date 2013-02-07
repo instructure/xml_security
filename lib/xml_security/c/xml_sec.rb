@@ -209,6 +209,8 @@ module XMLSecurity
 
       attach_function :xmlSecShutdown, [], :void
 
+      attach_function :xmlSecErrorsDefaultCallbackEnableOutput, [ :bool ], :void
+
       XMLSEC_KEYINFO_FLAGS_X509DATA_DONT_VERIFY_CERTS = 0x00000200
       XMLSEC_KEYINFO_FLAGS_X509DATA_SKIP_STRICT_CHECKS = 0x00004000
 
