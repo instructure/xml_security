@@ -134,9 +134,6 @@ module XMLSecurity
     signature_node = C::XMLSec.xmlSecFindNode(doc_root, C::XMLSec.xmlSecNodeSignature, C::XMLSec.xmlSecDSigNs)
     raise "signature node not found" if signature_node.null?
 
-    key_info_node = C::XMLSec.xmlSecFindNode(signature_node, C::XMLSec.xmlSecNodeKeyInfo, C::XMLSec.xmlSecDSigNs)
-    raise "key_info node not found" if key_info_node.null?
-
     certificate_node = C::XMLSec.xmlSecFindNode(signature_node, C::XMLSec.xmlSecNodeX509Certificate, C::XMLSec.xmlSecDSigNs)
     raise "certificate node not found" if certificate_node.null?
 
@@ -216,37 +213,10 @@ module XMLSecurity
     keys_manager
   end
 
-  def self._format_cert(cert)
-    # re-encode the certificate in the proper format
-    # this snippet is from http://bugs.ruby-lang.org/issues/4421
-    rsa = cert.public_key
-    modulus = rsa.n
-    exponent = rsa.e
-    oid = OpenSSL::ASN1::ObjectId.new("rsaEncryption")
-    alg_id = OpenSSL::ASN1::Sequence.new([oid, OpenSSL::ASN1::Null.new(nil)])
-    ary = [OpenSSL::ASN1::Integer.new(modulus), OpenSSL::ASN1::Integer.new(exponent)]
-    pub_key = OpenSSL::ASN1::Sequence.new(ary)
-    enc_pk = OpenSSL::ASN1::BitString.new(pub_key.to_der)
-    subject_pk_info = OpenSSL::ASN1::Sequence.new([alg_id, enc_pk])
-    base64 = Base64.encode64(subject_pk_info.to_der)
-
-    # This is the equivalent to the X.509 encoding used in >= 1.9.3
-    "-----BEGIN PUBLIC KEY-----\n#{base64}-----END PUBLIC KEY-----"
-  end
-
-
   def self._fingerprint_matches?(expected_fingerprint, cert)
     cert_fingerprint = Digest::SHA1.hexdigest(cert.to_der)
     expected_fingerprint = idp_cert_fingerprint.gsub(":", "").downcase
     return fingerprint == expected_fingerprint
-  end
-
-  def self._extract_embedded_certificate(xml_document)
-    parsed_document = LibXML::XML::Parser.string(xml_document).parse
-    base64_cert = parsed_document.find_first("//ds:X509Certificate", NAMESPACES).content
-    cert_text = Base64.decode64(base64_cert)
-    cert = OpenSSL::X509::Certificate.new(cert_text)
-    cert
   end
 
   def self._dump_doc(doc)
