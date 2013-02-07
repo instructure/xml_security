@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.authors = ['Paul Hinze']
   s.email = 'paul.t.hinze@gmail.com'
 
-  s.version = '0.0.2'
+  s.version = '0.0.3'
 
   s.files = FileList["README.md", "lib/**/*.rb"]
 
