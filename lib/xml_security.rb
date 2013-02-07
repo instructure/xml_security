@@ -24,6 +24,8 @@
 #
 require 'rubygems'
 require 'ffi'
+require 'time'
+require 'base64'
 
 require 'xml_security/c/lib_xml'
 require 'xml_security/c/xml_sec'
@@ -103,9 +105,9 @@ module XMLSecurity
     C::XMLSec.xmlSecDSigCtxDestroy(digital_signature_context) if defined?(digital_signature_context) && !digital_signature_context.null?
   end
 
-  def self.verify_signature(signed_xml_document, cert_fingerprint=nil)
+  def self.verify_signature(signed_xml_document, options={})
     init
-    if cert_fingerprint
+    if options.has_key? :cert_fingerprint
       return false unless _fingerprint_matches?(cert_fingerprint, cert)
     end
 
@@ -114,6 +116,12 @@ module XMLSecurity
 
     doc_root = C::LibXML.xmlDocGetRootElement(doc)
     raise "could not get doc root" if doc_root.null?
+
+    # add the ID attribute as an id. yeah, hacky
+    idary = FFI::MemoryPointer.new(:pointer, 2)
+    idary[0].put_pointer(0, FFI::MemoryPointer.from_string("ID"))
+    idary[1].put_pointer(0, nil)
+    C::XMLSec.xmlSecAddIDs(doc, doc_root, idary)
 
     keys_manager = _init_keys_manager
 
@@ -135,17 +143,18 @@ module XMLSecurity
     key = C::XMLSec.xmlSecKeyCreate
     raise "error while allocating security key" if key.null?
 
-    certptr = C::LibXML.xmlNodeGetContent(certificate_node)
-    raise "error while reading certificate node" if certptr.null?
-    cert64 = certptr.read_string
-    # C::LibXML.xmlFree(certptr)
+    cert64ptr = C::LibXML.xmlNodeGetContent(certificate_node)
+    raise "error while reading certificate node" if cert64ptr.null?
+    cert64 = cert64ptr.read_string
+    C::LibXML.xmlFree(cert64ptr)
 
-    certptr = FFI::MemoryPointer.new(:uchar, cert64.size)
+    cert = Base64.decode64(cert64)
 
-    bytesout = C::XMLSec.xmlSecBase64Decode(cert64, certptr, certptr.size)
-    cert = certptr.read_bytes(bytesout)
+    if options.has_key? :as_of
+      digital_signature_context[:keyInfoReadCtx][:certsVerificationTime] = Time.parse(options[:as_of]).to_i
+    end
 
-    key_add_result = C::XMLSec.xmlSecOpenSSLAppKeysMngrCertLoadMemory(keys_manager, cert, cert.size, :xmlSecKeyDataFormatDer, C::XMLSec.xmlSecKeyDataTypeTrusted)
+    key_add_result = C::XMLSec.xmlSecOpenSSLAppKeysMngrCertLoadMemory(keys_manager, cert, cert.size, :xmlSecKeyDataFormatCertDer, C::XMLSec.xmlSecKeyDataTypeTrusted)
     raise "failed to add key to keys manager" if key_add_result < 0
 
     if C::XMLSec.xmlSecDSigCtxVerify(digital_signature_context, signature_node) < 0

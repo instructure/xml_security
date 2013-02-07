@@ -147,7 +147,7 @@ module XMLSecurity
           :signMethod,                  :pointer,     # xmlSecTransformPtr
           :c14nMethod,                  :pointer,     # xmlSecTransformPtr
           :preSignMemBufMethod,         :pointer,     # xmlSecTransformPtr
-          :signValueNode,               :pointer,     # xmlNodePtr
+          :signValueNode,               LibXML::XmlNode.by_ref,     # xmlNodePtr
           :id,                          :string,
           :signedInfoReferences,        XmlSecPtrList,
           :manifestReferences,          XmlSecPtrList,
@@ -158,7 +158,7 @@ module XMLSecurity
       # xmlsec functions
       attach_function :xmlSecInit, [], :int
       attach_function :xmlSecParseMemory, [ :pointer, :uint, :int ], :pointer
-      attach_function :xmlSecFindNode, [ :pointer, :string, :string ], :pointer
+      attach_function :xmlSecFindNode, [ :pointer, :string, :string ], LibXML::XmlNode.by_ref
       attach_function :xmlSecFindChild, [ :pointer, :string, :string ], :pointer
       attach_function :xmlSecDSigCtxCreate, [ :pointer ], XmlSecDSigCtx.by_ref
       attach_function :xmlSecDSigCtxVerify, [ XmlSecDSigCtx.by_ref, :pointer ], :int
@@ -210,6 +210,7 @@ module XMLSecurity
       attach_function :xmlSecShutdown, [], :void
 
       XMLSEC_KEYINFO_FLAGS_X509DATA_DONT_VERIFY_CERTS = 0x00000200
+      XMLSEC_KEYINFO_FLAGS_X509DATA_SKIP_STRICT_CHECKS = 0x00004000
 
       def self.xmlSecNodeSignature
         'Signature'

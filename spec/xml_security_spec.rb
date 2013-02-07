@@ -36,19 +36,22 @@ describe XMLSecurity do
       XMLSecurity.verify_signature(signed_xml).should be_true
     end
 
+    it 'works with a properly signed SAML assertion' do
+      signed_xml = File.read(fixture_path("signed_assertion.xml"))
+
+      XMLSecurity.verify_signature(signed_xml, :as_of => '2007-08-14 12:01:34 UTC').should be_true
+    end
+
     it 'does not leak memory' do
-      pending('need to figure out how to bind xmlFree safely')
       signed_xml = File.read(fixture_path("helloworld_signedwithcert.xml"))
 
       XMLSecurity.init
 
-      should_not_leak_more_than(1024) do
+      should_not_leak_more_than(6*1024) do
         1000.times do
           XMLSecurity.verify_signature(signed_xml)
         end
-        sleep 10
       end
-
     end
   end
 

@@ -7,6 +7,27 @@ module XMLSecurity
       extend FFI::Library
       ffi_lib 'libxml2'
 
+      class XmlNode < FFI::Struct
+        layout \
+           :_private,   :pointer,
+           :type,       :int,          # <- cheating, actually an xmlElementType enum
+           :name,       :string,
+           :children,   XmlNode.by_ref,
+           :last,       :pointer,
+           :parent,     :pointer,
+           :next,       :pointer,
+           :prev,       :pointer,
+           :doc,        :pointer,
+
+           :ns,         :pointer,
+           :content,    :string,
+           :properties, :pointer,
+           :nsDef,      :pointer,
+           :psvi,       :pointer,
+           :line,       :ushort,
+           :extra,      :ushort
+      end
+
       # libxml functions
       attach_function :xmlInitParser, [], :void
       attach_function :xmlDocGetRootElement, [ :pointer ], :pointer
