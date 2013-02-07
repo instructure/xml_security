@@ -107,9 +107,6 @@ module XMLSecurity
 
   def self.verify_signature(signed_xml_document, options={})
     init
-    if options.has_key? :cert_fingerprint
-      return false unless _fingerprint_matches?(cert_fingerprint, cert)
-    end
 
     doc = C::LibXML.xmlParseMemory(signed_xml_document, signed_xml_document.size)
     raise "could not parse XML document" if doc.null?
@@ -146,6 +143,10 @@ module XMLSecurity
     C::LibXML.xmlFree(cert64ptr)
 
     cert = Base64.decode64(cert64)
+
+    if options.has_key? :cert_fingerprint
+      return false unless _fingerprint_matches?(options[:cert_fingerprint], cert)
+    end
 
     if options.has_key? :as_of
       digital_signature_context[:keyInfoReadCtx][:certsVerificationTime] = Time.parse(options[:as_of]).to_i
@@ -214,9 +215,9 @@ module XMLSecurity
   end
 
   def self._fingerprint_matches?(expected_fingerprint, cert)
-    cert_fingerprint = Digest::SHA1.hexdigest(cert.to_der)
-    expected_fingerprint = idp_cert_fingerprint.gsub(":", "").downcase
-    return fingerprint == expected_fingerprint
+    cert_fingerprint = Digest::SHA1.hexdigest(cert)
+    expected_fingerprint = expected_fingerprint.gsub(":", "").downcase
+    return cert_fingerprint == expected_fingerprint
   end
 
   def self._dump_doc(doc)

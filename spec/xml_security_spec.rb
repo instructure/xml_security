@@ -53,6 +53,20 @@ describe XMLSecurity do
         end
       end
     end
+
+    context 'with a cert_fingerprint provided' do
+      it 'passes when the fingerprint matches' do
+        signed_xml = File.read(fixture_path("helloworld_signedwithcert.xml"))
+
+        XMLSecurity.verify_signature(signed_xml, :cert_fingerprint => 'F3:01:B1:D2:3A:42:7F:72:50:4A:4F:59:8B:D0:06:C2:94:68:E8:7E').should be_true
+      end
+
+      it 'fails when the fingerprint does not match' do
+        signed_xml = File.read(fixture_path("helloworld_signedwithcert.xml"))
+
+        XMLSecurity.verify_signature(signed_xml, :cert_fingerprint => 'F3:01:B1:D2:3A:42:7F:72:50:4A:4F:59:8B:D0:06:C2:94:00:01:02').should be_false
+      end
+    end
   end
 
   describe '.decrypt' do
