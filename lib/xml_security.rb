@@ -31,6 +31,7 @@ require 'xml_security/c/xml_sec'
 
 require 'time'
 require 'base64'
+require 'digest/sha1'
 
 module XMLSecurity
   NAMESPACES = {
