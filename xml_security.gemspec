@@ -8,11 +8,9 @@ Gem::Specification.new do |s|
   s.authors = ['Paul Hinze']
   s.email = 'paul.t.hinze@gmail.com'
 
-  s.version = '0.0.1'
+  s.version = '0.0.2'
 
   s.files = FileList["README.md", "lib/**/*.rb"]
 
   s.add_dependency('ffi')
-  s.add_development_dependency 'ruby-debug'
-  s.add_development_dependency 'rspec', '1.3.2'
 end
