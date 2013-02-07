@@ -1,6 +1,3 @@
-require 'ffi'
-require 'ffi/libc'
-
 module XMLSecurity
   module C
     module LibXML
@@ -50,11 +47,11 @@ module XMLSecurity
       # attach_function :xmlMalloc, [ :int ], :pointer
 
       def self.xmlMalloc(*args)
-        FFI::LibC.malloc(*args)
+        C::LibC.malloc(*args)
       end
 
       def self.xmlFree(*args)
-        FFI::LibC.free(*args)
+        C::LibC.free(*args)
       end
 
       def self.init

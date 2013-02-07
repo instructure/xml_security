@@ -24,13 +24,13 @@
 #
 require 'rubygems'
 require 'ffi'
-require 'time'
-require 'base64'
 
+require 'xml_security/c/libc'
 require 'xml_security/c/lib_xml'
 require 'xml_security/c/xml_sec'
 
-require 'ruby-debug'
+require 'time'
+require 'base64'
 
 module XMLSecurity
   NAMESPACES = {

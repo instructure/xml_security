@@ -1,7 +1,6 @@
 source :rubygems
 
 gem 'ffi'
-gem 'ffi-libc', :git => 'https://github.com/postmodern/ffi-libc.git'
 
 group :development do
   gem 'ruby-debug', :platform => :ruby_18
