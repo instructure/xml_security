@@ -211,8 +211,19 @@ module XMLSecurity
 
       attach_function :xmlSecErrorsDefaultCallbackEnableOutput, [ :bool ], :void
 
+      attach_function :xmlSecErrorsSetCallback, [:pointer], :void
+
       XMLSEC_KEYINFO_FLAGS_X509DATA_DONT_VERIFY_CERTS = 0x00000200
       XMLSEC_KEYINFO_FLAGS_X509DATA_SKIP_STRICT_CHECKS = 0x00004000
+
+      XMLSEC_ERRORS_R_INVALID_DATA = 12
+      XMLSEC_ERRORS_R_DATA_NOT_MATCH = 18
+
+      ErrorCallback = FFI::Function.new(:void,
+          [ :string, :int, :string, :string,     :string,      :int,   :string ]
+      ) do |file,    line, func,    errorObject, errorSubject, reason, msg     |
+        XMLSecurity::Exception.handle_xmlsec_error_callback(file, line, func, errorObject, errorSubject, reason, msg)
+      end
 
       def self.xmlSecNodeSignature
         'Signature'
@@ -250,6 +261,7 @@ module XMLSecurity
         raise "Failed initializing XMLSec" if xmlSecInit < 0
         raise "Failed initializing app crypto" if xmlSecOpenSSLAppInit(nil) < 0
         raise "Failed initializing crypto" if xmlSecOpenSSLInit < 0
+        xmlSecErrorsSetCallback(ErrorCallback)
       end
 
       def self.shutdown

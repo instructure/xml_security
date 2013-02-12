@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'spec'
 require 'spec/autorun'
+require 'ruby-debug'
 
 $:.unshift File.expand_path('../../lib', __FILE__)
 

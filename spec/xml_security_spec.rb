@@ -33,7 +33,7 @@ describe XMLSecurity do
     it 'passes when the signature checks out with the included cert file' do
       signed_xml = File.read(fixture_path("helloworld_signedwithcert.xml"))
 
-      XMLSecurity.verify_signature(signed_xml).should be_true
+      XMLSecurity.verify_signature(signed_xml).should be_success
     end
 
     it 'works with a properly signed SAML assertion' do
@@ -42,10 +42,22 @@ describe XMLSecurity do
       XMLSecurity.verify_signature(signed_xml, :as_of => '2007-08-14 12:01:34 UTC').should be_true
     end
 
+    it 'fails when a tampered message contains a bad digest' do
+      signed_xml = File.read(fixture_path("helloworld_baddigest.xml"))
+      verification_result = XMLSecurity.verify_signature(signed_xml)
+      verification_result.should be_invalid
+      verification_result.message.should == 'data and digest do not match'
+    end
+
+    it 'fails when a tampered message contains a good digest but a bad signature' do
+      signed_xml = File.read(fixture_path("helloworld_badsig.xml"))
+      verification_result = XMLSecurity.verify_signature(signed_xml)
+      verification_result.should be_invalid
+      verification_result.message.should == 'signature do not match'
+    end
+
     it 'does not leak memory' do
       signed_xml = File.read(fixture_path("helloworld_signedwithcert.xml"))
-
-      XMLSecurity.init
 
       should_not_leak_more_than(6*1024) do
         1000.times do

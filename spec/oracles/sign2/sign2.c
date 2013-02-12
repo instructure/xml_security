@@ -206,6 +206,10 @@ sign_file(const char* xml_file, const char* key_file) {
 
     /* create signature context, we don't need keys manager in this example */
     dsigCtx = xmlSecDSigCtxCreate(NULL);
+
+    dsigCtx->flags |= XMLSEC_DSIG_FLAGS_STORE_SIGNEDINFO_REFERENCES |
+                      XMLSEC_DSIG_FLAGS_STORE_MANIFEST_REFERENCES; 
+
     if(dsigCtx == NULL) {
         fprintf(stderr,"Error: failed to create signature context\n");
         goto done;
@@ -229,6 +233,8 @@ sign_file(const char* xml_file, const char* key_file) {
         fprintf(stderr,"Error: signature failed\n");
         goto done;
     }
+
+    xmlSecDSigCtxDebugDump(dsigCtx, stderr);
 
     /* print signed document to stdout */
     xmlDocDump(stdout, doc);

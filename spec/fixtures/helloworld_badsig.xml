@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<greeting>
+  <contents>Hello Evil World!</contents>
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
+<SignedInfo>
+<CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+<SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
+<Reference>
+<Transforms>
+<Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+</Transforms>
+<DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
+<DigestValue>UitPwJQKuOfOp15DfktW6T1ngqk=</DigestValue>
+</Reference>
+</SignedInfo>
+<SignatureValue>r+ORd3vpW4lQNylRO+zM8w3vW/H5B8X/cwevHLbemJson6S74ibIL84OI7yqAjU0
+Ghov3yka/W79oFJL5wQKXLKPrqUu+L1VVm6l5ngvM/+fsm/TVGIpGnPPfUxlk/ZQ
+HYhnTN4tj6csIWX/IPHbcL7m3VsHHoKOj3EzNvVwhck=</SignatureValue>
+<KeyInfo>
+<X509Data>
+<X509Certificate>MIIDKzCCApSgAwIBAgIJAJRPwB2/pSaxMA0GCSqGSIb3DQEBBQUAMG0xCzAJBgNV
+BAYTAkFVMRMwEQYDVQQIEwpTb21lLVN0YXRlMSEwHwYDVQQKExhJbnRlcm5ldCBX
+aWRnaXRzIFB0eSBMdGQxJjAkBgNVBAMUHXhtbF9zZWN1cml0eSB0ZXN0IGNlcnRp
+ZmljYXRlMB4XDTEzMDIwMTA0MzIyMVoXDTIzMDEzMDA0MzIyMVowbTELMAkGA1UE
+BhMCQVUxEzARBgNVBAgTClNvbWUtU3RhdGUxITAfBgNVBAoTGEludGVybmV0IFdp
+ZGdpdHMgUHR5IEx0ZDEmMCQGA1UEAxQdeG1sX3NlY3VyaXR5IHRlc3QgY2VydGlm
+aWNhdGUwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAMDlZVGYA0rbhDrOo3kv
+hLwwtSEYO44wKcQZSO2d5+hc5guib0myq2iXVsWJP/SYM3AjvwcuVEHS9CfOHnPt
+kI4Tg0mkJ2oqyZRrmjuWDrzpy64k7zLsUsTlDzP+UtQdO79YBMpqy2Zk2CHg6TJG
+FEXtuWcPj6lRLpYt2V/iwkIPAgMBAAGjgdIwgc8wHQYDVR0OBBYEFE8iHArm77lE
+R1byIJAeS0FUIVEsMIGfBgNVHSMEgZcwgZSAFE8iHArm77lER1byIJAeS0FUIVEs
+oXGkbzBtMQswCQYDVQQGEwJBVTETMBEGA1UECBMKU29tZS1TdGF0ZTEhMB8GA1UE
+ChMYSW50ZXJuZXQgV2lkZ2l0cyBQdHkgTHRkMSYwJAYDVQQDFB14bWxfc2VjdXJp
+dHkgdGVzdCBjZXJ0aWZpY2F0ZYIJAJRPwB2/pSaxMAwGA1UdEwQFMAMBAf8wDQYJ
+KoZIhvcNAQEFBQADgYEAe7O4WONdCQAtEnd6EbrMbYCcWiSWFIZ5cQb4o1fz5E55
+1szFz9TN97X2qfWFf5gFW/Aq6V+qpqJalQxZUt92r31VA3MDiTZGzlFVtWiRNypZ
+FQPsR2YL3zICfS5Hjdm6FKnW1fUd5LSzwrUQ+sHEHrtGYKsfHeL1IxGMy5W4/5o=</X509Certificate>
+</X509Data>
+</KeyInfo>
+</Signature></greeting>
