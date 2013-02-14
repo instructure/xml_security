@@ -5,7 +5,7 @@ module XMLSecurity
     end
 
     def exception_class
-      raise XMLSecurity::Exception.new("must set exception_class for #{self.class}")
+      raise XMLSecurity::Exception.new("must set exception_class for #{self.name}") unless @exception_class
       @exception_class
     end
 

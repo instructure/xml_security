@@ -39,6 +39,7 @@ require 'xml_security/signature_verification_result'
 require 'time'
 require 'base64'
 require 'digest/sha1'
+require 'openssl'
 
 module XMLSecurity
   NAMESPACES = {

@@ -35,9 +35,7 @@ module XMLSecurity
 
       cert = _extract_cert(signature_node)
 
-      if options.has_key? :cert_fingerprint
-        return false unless _fingerprint_matches?(options[:cert_fingerprint], cert)
-      end
+      _assert_fingerprint_matches(options[:cert_fingerprint], cert) if options.has_key? :cert_fingerprint
 
       if options.has_key? :as_of
         digital_signature_context[:keyInfoReadCtx][:certsVerificationTime] = Time.parse(options[:as_of]).to_i
@@ -65,6 +63,18 @@ module XMLSecurity
       C::XMLSec.xmlSecKeyDestroy(key) if defined?(key) && key && !key.null?
     end
 
+    def self._debug_dump_all_transforms
+      size = C::XMLSec.xmlSecPtrListGetSize(C::XMLSec.xmlSecTransformIdsGet)
+
+      (0..(size-1)).each do |i|
+        item = C::XMLSec.xmlSecPtrListGetItem(C::XMLSec.xmlSecTransformIdsGet, i)
+        unless item.null?
+          transform = C::XMLSec::XmlSecTransformId.new item
+          p transform[:href]
+        end
+      end
+    end
+
     def self._extract_cert(signature_node)
       certificate_node = _assert_pointer(
         C::XMLSec.xmlSecFindNode(signature_node, C::XMLSec.xmlSecNodeX509Certificate, C::XMLSec.xmlSecDSigNs),
@@ -81,10 +91,13 @@ module XMLSecurity
       Base64.decode64(cert64)
     end
 
-    def self._fingerprint_matches?(expected_fingerprint, cert)
-      cert_fingerprint = Digest::SHA1.hexdigest(cert)
+    def self._assert_fingerprint_matches(expected_fingerprint, cert)
+      openssl_cert = OpenSSL::X509::Certificate.new(cert)
+      cert_fingerprint = Digest::SHA1.hexdigest(openssl_cert.to_der)
       expected_fingerprint = expected_fingerprint.gsub(":", "").downcase
-      cert_fingerprint == expected_fingerprint
+      unless cert_fingerprint == expected_fingerprint
+        raise FingerprintMismatchError.new(expected_fingerprint, cert_fingerprint)
+      end
     end
   end
 end

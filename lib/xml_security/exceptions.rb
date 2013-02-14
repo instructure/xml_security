@@ -3,7 +3,7 @@ module XMLSecurity
     attr_accessor :file, :line, :func, :errorObject, :errorSubject, :reason, :msg
 
     def self.handle_xmlsec_error_callback(file, line, func, errorObject, errorSubject, reason, msg)
-      exception = _exception_class_for_msg(msg).new(msg)
+      exception = _exception_class_for_msg(msg).new("#{file}:#{line} (#{func}) - #{errorObject} #{errorSubject} #{reason} #{msg}")
       exception.file = file
       exception.line = line
       exception.func = func
@@ -11,7 +11,15 @@ module XMLSecurity
       exception.errorSubject = errorSubject
       exception.reason = reason
       exception.msg = msg
-      raise exception
+      if _should_raise?(exception)
+        raise exception
+      else
+        puts exception.xmlsec_inspect
+      end
+    end
+
+    def self._should_raise?(exception)
+      true # for now
     end
 
     def self._exception_class_for_msg(msg)
@@ -21,9 +29,27 @@ module XMLSecurity
       else Exception
       end
     end
+
+    def xmlsec_inspect
+      [
+        "file = #{file}",
+        "line = #{line}",
+        "func = #{func}",
+        "errorObject = #{errorObject}",
+        "errorSubject = #{errorSubject}",
+        "reason = #{reason}",
+        "msg = #{msg}"
+      ].join("\n")
+    end
   end
 
   class SignatureVerificationException < Exception; end
   class SignatureMismatchError < SignatureVerificationException; end
   class DigestMismatchError < SignatureVerificationException; end
+
+  class FingerprintMismatchError < SignatureVerificationException
+    def initialize(expected, actual)
+      super("fingerprint mismatch; expected: '#{expected}', got: '#{actual}'")
+    end
+  end
 end

@@ -73,6 +73,37 @@ module XMLSecurity
           :reserved2,                   :pointer         # void *
       end
 
+      class XmlSecTransformId < FFI::Struct
+        layout \
+           :klassSize,   :uint,
+           :objSize,     :uint,
+
+           :name,        :string,
+           :href,        :string,
+           :usage,       :uint,
+
+           :initialize,  :pointer,
+           :finalize,    :pointer,
+
+           :readNode,    :pointer,
+           :writeNode,   :pointer,
+
+           :setKeyReq,   :pointer,
+           :setKey,      :pointer,
+           :verify,      :pointer,
+           :getDataType, :pointer,
+
+           :pushBin,     :pointer,
+           :popBin,      :pointer,
+           :pushXml,     :pointer,
+           :popXml,      :pointer,
+
+           :execute,     :pointer,
+
+           :reserved0,   :pointer,
+           :reserved1,   :pointer
+      end
+
       class XmlSecTransformCtx < FFI::Struct
         layout \
           :userData,                    :pointer,        # void *
@@ -213,11 +244,23 @@ module XMLSecurity
 
       attach_function :xmlSecErrorsSetCallback, [:pointer], :void
 
+      attach_function :xmlSecDSigCtxDebugDump, [:pointer, :pointer], :void
+      attach_function :xmlSecPtrListDebugDump, [:pointer, :pointer], :void
+      attach_function :xmlSecPtrListGetSize, [:pointer], :size_t
+      attach_function :xmlSecPtrListGetItem, [:pointer, :size_t], :pointer
+      attach_function :xmlSecTransformIdsGet, [], XmlSecTransformId.by_ref
+      attach_function :xmlSecTransformIdListFindByHref, [:pointer, :string, :uint], XmlSecTransformId.by_ref
+      attach_function :xmlSecTransformIdsRegister, [XmlSecTransformId.by_ref], :int
+
+      attach_function :xmlSecOpenSSLAppDefaultKeysMngrInit, [:pointer], :int
+
       XMLSEC_KEYINFO_FLAGS_X509DATA_DONT_VERIFY_CERTS = 0x00000200
       XMLSEC_KEYINFO_FLAGS_X509DATA_SKIP_STRICT_CHECKS = 0x00004000
 
       XMLSEC_ERRORS_R_INVALID_DATA = 12
       XMLSEC_ERRORS_R_DATA_NOT_MATCH = 18
+
+      XMLSEC_TRANSFORM_USAGE_ANY = 0xFFFF
 
       ErrorCallback = FFI::Function.new(:void,
           [ :string, :int, :string, :string,     :string,      :int,   :string ]
